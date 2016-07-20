@@ -76,30 +76,6 @@ public class CardPaymentData implements PaymentData {
     }
 
     @Override
-    public String serialize() throws EncrypterException, NoPublicKeyExeption {
-        JSONObject cardJson = new JSONObject();
-        String encryptedData = null;
-
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        try {
-            cardJson.put("generationtime", simpleDateFormat.format(generationTime));
-            cardJson.put("number", number);
-            cardJson.put("holderName", cardHolderName);
-            cardJson.put("cvc", cvc);
-            cardJson.put("expiryMonth", expiryMonth);
-            cardJson.put("expiryYear", expiryYear);
-            encryptedData = Adyen.getInstance().encryptData(cardJson.toString());
-        } catch (JSONException e) {
-            Log.e(tag, e.getMessage(), e);
-        }
-
-
-        return encryptedData;
-    }
-
-    @Override
     public String toString() {
         JSONObject cardJson = new JSONObject();
 

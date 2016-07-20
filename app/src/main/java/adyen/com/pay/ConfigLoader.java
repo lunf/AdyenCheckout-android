@@ -1,5 +1,6 @@
 package adyen.com.pay;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -19,14 +20,15 @@ import adyen.com.adyenpaysdk.controllers.NetworkController;
 public class ConfigLoader {
 
     private String tag = ConfigLoader.class.getSimpleName();
+    private Context mContext;
 
-    public ConfigLoader() {
-
+    public ConfigLoader(Context context) {
+        mContext = context;
     }
 
     public JSONObject loadJsonConfiguration() {
         JSONObject configurationJson;
-        InputStream inputStream = NetworkController.getInstance().getGlobalContext().getResources().openRawResource(R.raw.config);
+        InputStream inputStream = mContext.getResources().openRawResource(R.raw.config);
 
         try {
             BufferedReader streamReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));

@@ -1,13 +1,18 @@
 package adyen.com.adyenpaysdk;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
+
 import adyen.com.adyenpaysdk.exceptions.EncrypterException;
 import adyen.com.adyenpaysdk.exceptions.NoPublicKeyExeption;
+import adyen.com.adyenpaysdk.pojo.CardPaymentData;
 import adyen.com.adyenpaysdk.services.PaymentService;
 import adyen.com.adyenpaysdk.services.PaymentServiceImpl;
 import adyen.com.adyenpaysdk.util.ClientSideEncrypter;
@@ -26,6 +31,7 @@ public class Adyen {
     private boolean useTestBackend = false;
     private String token;
     private String publicKey;
+    private static Context mContext;
 
     public interface CompletionCallback {
 
@@ -35,19 +41,19 @@ public class Adyen {
 
     }
 
-    private Adyen() {
-
+    private Adyen(Context context) {
+        mContext = context;
     }
 
-    public static Adyen getInstance() {
+    public static Adyen getInstance(Context context) {
         if(mInstance == null) {
-            mInstance = new Adyen();
+            mInstance = new Adyen(context);
         }
         return mInstance;
     }
 
     public void fetchPublicKey(final CompletionCallback completion) {
-        PaymentService paymentService = new PaymentServiceImpl();
+        PaymentService paymentService = new PaymentServiceImpl(mContext);
         String host = (useTestBackend) ? "test" : "live";
         String url = String.format("https://%s.adyen.com/hpp/cse/%s/json.shtml", host, token);
         paymentService.fetchPublicKey(url, new PaymentServiceImpl.VolleyCallback() {
@@ -111,5 +117,28 @@ public class Adyen {
 
     public void setPublicKey(String publicKey) {
         this.publicKey = publicKey;
+    }
+
+    public String serialize(CardPaymentData cardPaymentData) throws EncrypterException, NoPublicKeyExeption {
+        JSONObject cardJson = new JSONObject();
+        String encryptedData = null;
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        try {
+            cardJson.put("generationtime", simpleDateFormat.format(cardPaymentData.getGenerationTime()));
+            cardJson.put("number", cardPaymentData.getNumber());
+            cardJson.put("holderName", cardPaymentData.getCardHolderName());
+            cardJson.put("cvc", cardPaymentData.getCvc());
+            cardJson.put("expiryMonth", cardPaymentData.getExpiryMonth());
+            cardJson.put("expiryYear", cardPaymentData.getExpiryYear());
+            encryptedData = encryptData(cardJson.toString());
+        } catch (JSONException e) {
+            Log.e(tag, e.getMessage(), e);
+        }
+
+
+        return encryptedData;
     }
 }

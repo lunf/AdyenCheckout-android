@@ -207,14 +207,14 @@ public class PaymentActivity extends Activity {
             public void onClick(View v) {
                 if (CreditCardForm.isValid()) {
                     final CardPaymentData cardPaymentData = buildCardData();
-                    Adyen.getInstance().setToken(extras.getString("token"));
-                    Adyen.getInstance().setUseTestBackend(extras.getBoolean("useTestBackend"));
-                    Adyen.getInstance().fetchPublicKey(new Adyen.CompletionCallback() {
+                    Adyen.getInstance(getApplicationContext()).setToken(extras.getString("token"));
+                    Adyen.getInstance(getApplicationContext()).setUseTestBackend(extras.getBoolean("useTestBackend"));
+                    Adyen.getInstance(getApplicationContext()).fetchPublicKey(new Adyen.CompletionCallback() {
                         @Override
                         public void onSuccess(String result) {
                             try {
                                 CheckoutResponse checkoutResponse = new CheckoutResponse();
-                                checkoutResponse.setPaymentData(cardPaymentData.serialize());
+                                checkoutResponse.setPaymentData(Adyen.getInstance(getApplicationContext()).serialize(cardPaymentData));
                                 checkoutResponse.setAmount(extras.getFloat("amount"));
                                 checkoutResponse.setCurrency(Currency.valueOf(extras.getString("currency")));
                                 adyenCheckoutListener.checkoutAuthorizedPayment(checkoutResponse);

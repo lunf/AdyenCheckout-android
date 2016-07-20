@@ -11,7 +11,7 @@ import com.android.volley.toolbox.Volley;
 /**
  * Created by andrei on 11/11/15.
  */
-public class NetworkController extends Application {
+public class NetworkController {
 
     private static final String TAG = NetworkController.class.getSimpleName();
 
@@ -19,19 +19,23 @@ public class NetworkController extends Application {
 
     private static NetworkController mInstance;
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        mInstance = this;
+    private static Context mContext;
+
+    private NetworkController(Context context) {
+        mContext = context;
     }
 
-    public static synchronized NetworkController getInstance() {
+    public static synchronized NetworkController getInstance(Context context) {
+        if (null == mInstance) {
+            mInstance =  new NetworkController(context);
+        }
+
         return mInstance;
     }
 
     public RequestQueue getRequestQueue() {
         if (mRequestQueue == null) {
-            mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+            mRequestQueue = Volley.newRequestQueue(mContext);
         }
         return mRequestQueue;
     }
@@ -53,7 +57,7 @@ public class NetworkController extends Application {
     }
 
     public Context getGlobalContext() {
-        return getApplicationContext();
+        return mContext;
     }
 
 }

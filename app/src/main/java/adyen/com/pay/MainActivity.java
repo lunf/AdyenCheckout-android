@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,7 +44,7 @@ public class MainActivity extends FragmentActivity implements AdyenCheckoutListe
     }
 
     public void initPayment(View view) {
-        ConfigLoader configLoader = new ConfigLoader();
+        ConfigLoader configLoader = new ConfigLoader(this);
         JSONObject configuration = configLoader.loadJsonConfiguration();
         CheckoutRequest checkoutRequest = new CheckoutRequest();
         try {
@@ -66,10 +67,11 @@ public class MainActivity extends FragmentActivity implements AdyenCheckoutListe
     @Override
     public void checkoutAuthorizedPayment(CheckoutResponse checkoutResponse) {
         Log.i("Response: ", checkoutResponse.toString());
+        Toast.makeText(context, "Card data encrypted and ready to submit to your server", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void checkoutFailedWithError(String errorMessage) {
-
+        Log.i("Fail: ", errorMessage);
     }
 }

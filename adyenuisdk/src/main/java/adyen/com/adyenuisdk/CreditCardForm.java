@@ -148,10 +148,10 @@ public class CreditCardForm extends LinearLayout {
             public void onFocusChange(View v, boolean hasFocus) {
                 Log.i("OnFocusChange: ", String.valueOf(hasFocus));
                 String creditCardNumber = mCreditCardNo.getText().toString();
-                if (!TextUtils.isEmpty(creditCardNumber) && !Adyen.getInstance().luhnCheck(creditCardNumber.toString()) && !hasFocus) {
+                if (!TextUtils.isEmpty(creditCardNumber) && !Adyen.getInstance(getContext()).luhnCheck(creditCardNumber.toString()) && !hasFocus) {
                     mCreditCardNo.setTextColor(getResources().getColor(R.color.red));
                     mValidCardNumber = false;
-                } else if (Adyen.getInstance().luhnCheck(creditCardNumber.toString()) || hasFocus) {
+                } else if (Adyen.getInstance(getContext()).luhnCheck(creditCardNumber.toString()) || hasFocus) {
                     mCreditCardNo.setTextColor(getResources().getColor(R.color.black));
                     mValidCardNumber = true;
                 }

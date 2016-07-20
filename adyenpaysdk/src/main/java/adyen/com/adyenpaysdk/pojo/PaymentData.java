@@ -9,6 +9,5 @@ import adyen.com.adyenpaysdk.exceptions.NoPublicKeyExeption;
  */
 public interface PaymentData {
 
-    public String serialize() throws EncrypterException, NoPublicKeyExeption;
 
 }
