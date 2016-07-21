@@ -1,5 +1,16 @@
 # Adyen Checkout
 
+### Introduction
+
+I fork this repo because the original has the following issues
+ * AdyenPaySdk need to start its own context (extends Application context), this approach is not good because library should use the parent context which is provided by parent application.
+ * The coding is not meeting our standard, there are couping code and class is not encapsulation. E.g: CardPaymentData requires Adyen instance to do the serialise (encryption). 
+ * The business logic in service layer is not contained, you will see it in network layer.
+ * Some method violate the Single Responsibility Principle.
+
+### Future Improvement
+ * Move to Reactive instead of using callback
+
 ### Index
 **[About](#about)**
 
@@ -107,16 +118,16 @@ Add the `PaymentActivity` in your `AndroidManifest.xml`:
 Next, in order to lauch `PaymentActivity` add the code snippet bellow on the click event on your checkout button:
 
 ```java
-CheckoutRequest checkoutRequest = new CheckoutRequest();
+PaymentInitRequest paymentInitRequest = new PaymentInitRequest();
 try {
-    checkoutRequest.setBrandColor(your_brand_color);
-    checkoutRequest.setBrandLogo(your_brand_logo);
-    checkoutRequest.setCheckoutAmount(checkout_amount);
-    checkoutRequest.setCurrency(Currency.EUR);
-    checkoutRequest.setToken(your_token);
-    checkoutRequest.setTestBackend(true);//default is set to false. Set it to true if you want to use Adyen's test back-end.
+    paymentInitRequest.setBrandColor(your_brand_color);
+    paymentInitRequest.setBrandLogo(your_brand_logo);
+    paymentInitRequest.setCheckoutAmount(checkout_amount);
+    paymentInitRequest.setCurrency(Currency.EUR);
+    paymentInitRequest.setToken(your_token);
+    paymentInitRequest.setTestBackend(true);//default is set to false. Set it to true if you want to use Adyen's test back-end.
 
-    Intent intent = new PaymentActivity.PaymentActivityBuilder(checkoutRequest).build(this, context);
+    Intent intent = new PaymentActivity.PaymentActivityBuilder(paymentInitRequest).build(this, context);
     startActivity(intent);
 } catch (CheckoutRequestException e) {
     Log.e("tag", e.getMessage(), e);
@@ -152,23 +163,29 @@ Now that both the UI library and the SDK are part of your project you need to ad
     android:layout_height="wrap_content" />
 ```
 
-As you are implementing your own payment button, you need to call the following API calls to retrieve the encrypted card data, and send it to the your server.
+As you are using our payment button, you need to call the following to init the payment flow.
+
 
 ```java
-public void initCreditCardPayment(final CardPaymentData cardPaymentData) {
-    Adyen.getInstance().fetchPublickKey(new CompletionCallback() {
-        @Override
-        public void onSuccess(String result) {
-            String ecryptedData = cardPaymentData.serialize();
-            
-            //Send ecryptedData to your merchant server
-        }
-        
-        @Override
-        public void onError(String message) {
+ public void initPayment(View view) {
+    ConfigLoader configLoader = new ConfigLoader(this);
+    JSONObject configuration = configLoader.loadJsonConfiguration();
+    PaymentInitRequest paymentInitRequest = new PaymentInitRequest();
+    try {
+        paymentInitRequest.setBrandColor(R.color.nespresso_grey);
+        paymentInitRequest.setBrandLogo(R.mipmap.nespresso_logo);
+        paymentInitRequest.setCheckoutAmount(10f);
+        paymentInitRequest.setCurrency(Currency.EUR);
+        paymentInitRequest.setToken(configuration.getString("userToken"));
+        paymentInitRequest.setTestBackend(true);
 
-        }
-    });
+        Intent intent = new PaymentActivity.PaymentActivityBuilder(paymentInitRequest).build(this, context);
+        startActivity(intent);
+    } catch (JSONException e) {
+        e.printStackTrace();
+    } catch (CheckoutRequestException e) {
+        e.printStackTrace();
+    }
 }
 ```
 
@@ -188,14 +205,20 @@ Follow these steps to edit your `build.gradle` and start using Adyen checkout fo
     
 After including the library SDK in your Android application, implement the following API calls to retrieve the encrypted card data, and send it to your server.
 
+
+1. You need to fetch public key with your cse token
+2. You will encrypt CardPaymentData with your public key
+
+
 ```java
-public void initCreditCardPayment(final CardPaymentData cardPaymentData) {
-    Adyen.getInstance().fetchPublickKey(new CompletionCallback() {
+public void initCreditCardPayment(final isTestMode, String cseToken) {
+    
+    mAdyenSdk.fetchPublickKey(isTestMode, cseToken, new CompletionCallback() {
         @Override
-        public void onSuccess(String result) {
-            String ecryptedData = cardPaymentData.serialize();
+        public void onSuccess(String publicKey) {
             
-            //Send ecryptedData to your merchant server
+            
+            //Save public key for later doing encryption
         }
         
         @Override
@@ -206,7 +229,34 @@ public void initCreditCardPayment(final CardPaymentData cardPaymentData) {
 }
 ```
 
-Check our `adyen.com.adyenpaysdk.Adyen.java` for a complete code example of a library SDK implementation.
+```java
+private void encryptPaymentData(String publicKey, final CardPaymentData cardPaymentData) {
+
+    mAdyenSdk.encryptCard(publicKey, cardPaymentData, new AdyenSdk.CompletionCallback() {
+        @Override
+        public void onSuccess(String paymentDataEncrypted) {
+            
+            //Now you can send encrypted payment data to your merchant server via CheckoutMerchantRequest object
+
+            CheckoutMerchantRequest checkoutMerchantRequest = new CheckoutMerchantRequest();
+            checkoutMerchantRequest.setPaymentData(paymentDataEncrypted);
+            checkoutMerchantRequest.setAmount(cardPaymentData.getAmount()));
+            checkoutMerchantRequest.setCurrency(cardPaymentData.getCurrency().getCurrencySign()));
+            
+
+        }
+
+        @Override
+        public void onError(String error) {
+            
+            
+        }
+    });
+
+}
+```
+
+Check our `adyen.com.adyenpaysdk.AdyenSdk.java` for a complete code example of a library SDK implementation.
 
 ### Merchant server
 
