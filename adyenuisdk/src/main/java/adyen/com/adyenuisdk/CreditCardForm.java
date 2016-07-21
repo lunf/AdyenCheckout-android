@@ -19,7 +19,7 @@ import android.widget.ViewSwitcher;
 
 import java.util.Calendar;
 
-import adyen.com.adyenpaysdk.Adyen;
+import adyen.com.adyenpaysdk.AdyenSdk;
 import adyen.com.adyenpaysdk.util.CardType;
 import adyen.com.adyenuisdk.customcomponents.AdyenEditText;
 
@@ -37,7 +37,7 @@ public class CreditCardForm extends LinearLayout {
     private static boolean mValidCardNumber = false;
     private static boolean mValidExpiryDate = false;
     private static boolean mValidCvc = false;
-
+    private AdyenSdk mAdyenSdk;
 
     public CreditCardForm(Context context) {
         super(context);
@@ -148,10 +148,11 @@ public class CreditCardForm extends LinearLayout {
             public void onFocusChange(View v, boolean hasFocus) {
                 Log.i("OnFocusChange: ", String.valueOf(hasFocus));
                 String creditCardNumber = mCreditCardNo.getText().toString();
-                if (!TextUtils.isEmpty(creditCardNumber) && !Adyen.getInstance(getContext()).luhnCheck(creditCardNumber.toString()) && !hasFocus) {
+                mAdyenSdk = new AdyenSdk(getContext());
+                if (!TextUtils.isEmpty(creditCardNumber) && !mAdyenSdk.doLuhnCheck(creditCardNumber.toString()) && !hasFocus) {
                     mCreditCardNo.setTextColor(getResources().getColor(R.color.red));
                     mValidCardNumber = false;
-                } else if (Adyen.getInstance(getContext()).luhnCheck(creditCardNumber.toString()) || hasFocus) {
+                } else if (mAdyenSdk.doLuhnCheck(creditCardNumber.toString()) || hasFocus) {
                     mCreditCardNo.setTextColor(getResources().getColor(R.color.black));
                     mValidCardNumber = true;
                 }

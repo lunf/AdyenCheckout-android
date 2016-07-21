@@ -1,6 +1,7 @@
 package adyen.com.adyenuisdk;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -21,10 +22,8 @@ import android.widget.TextView;
 
 import java.util.Date;
 
-import adyen.com.adyenpaysdk.Adyen;
+import adyen.com.adyenpaysdk.AdyenSdk;
 import adyen.com.adyenpaysdk.exceptions.CheckoutRequestException;
-import adyen.com.adyenpaysdk.exceptions.EncrypterException;
-import adyen.com.adyenpaysdk.exceptions.NoPublicKeyExeption;
 import adyen.com.adyenpaysdk.pojo.CardPaymentData;
 import adyen.com.adyenpaysdk.pojo.CheckoutRequest;
 import adyen.com.adyenpaysdk.pojo.CheckoutResponse;
@@ -58,6 +57,9 @@ public class PaymentActivity extends Activity {
     private static AdyenCheckoutListener adyenCheckoutListener;
 
     private Bundle extras;
+    private AdyenSdk mAdyenSdk;
+
+    private ProgressDialog mProgressDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -91,11 +93,20 @@ public class PaymentActivity extends Activity {
                 setStatusBarColor(Color.parseColor(
                         ColorUtil.changeColorHSB(getResources().getString(extras.getInt("backgroundColor")))));
         }
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Loading. Please wait.....");
+
+        mAdyenSdk = new AdyenSdk(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        hideInputKeyboard();
+    }
+
+    private void hideInputKeyboard() {
         inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
     }
 
@@ -206,27 +217,19 @@ public class PaymentActivity extends Activity {
             @Override
             public void onClick(View v) {
                 if (CreditCardForm.isValid()) {
-                    final CardPaymentData cardPaymentData = buildCardData();
-                    Adyen.getInstance(getApplicationContext()).setToken(extras.getString("token"));
-                    Adyen.getInstance(getApplicationContext()).setUseTestBackend(extras.getBoolean("useTestBackend"));
-                    Adyen.getInstance(getApplicationContext()).fetchPublicKey(new Adyen.CompletionCallback() {
+                    hideInputKeyboard();
+                    mProgressDialog.show();
+                    String cseToken = extras.getString("token");
+                    boolean isTestMode = extras.getBoolean("useTestBackend");
+                    mAdyenSdk.fetchPublicKey(isTestMode, cseToken, new AdyenSdk.CompletionCallback() {
                         @Override
                         public void onSuccess(String result) {
-                            try {
-                                CheckoutResponse checkoutResponse = new CheckoutResponse();
-                                checkoutResponse.setPaymentData(Adyen.getInstance(getApplicationContext()).serialize(cardPaymentData));
-                                checkoutResponse.setAmount(extras.getFloat("amount"));
-                                checkoutResponse.setCurrency(Currency.valueOf(extras.getString("currency")));
-                                adyenCheckoutListener.checkoutAuthorizedPayment(checkoutResponse);
-                            } catch (EncrypterException e) {
-                                e.printStackTrace();
-                            } catch (NoPublicKeyExeption noPublicKeyExeption) {
-                                noPublicKeyExeption.printStackTrace();
-                            }
+                            encryptPaymentData(result);
                         }
 
                         @Override
                         public void onError(String error) {
+                            mProgressDialog.dismiss();
                             adyenCheckoutListener.checkoutFailedWithError(error);
                         }
                     });
@@ -235,6 +238,30 @@ public class PaymentActivity extends Activity {
         });
     }
 
+    private void encryptPaymentData(String publicKey) {
+
+        final CardPaymentData cardPaymentData = buildCardData();
+
+        mAdyenSdk.encryptCard(publicKey, cardPaymentData, new AdyenSdk.CompletionCallback() {
+            @Override
+            public void onSuccess(String result) {
+                mProgressDialog.dismiss();
+                CheckoutResponse checkoutResponse = new CheckoutResponse();
+                checkoutResponse.setPaymentData(result);
+                checkoutResponse.setAmount(extras.getFloat("amount"));
+                checkoutResponse.setCurrency(Currency.valueOf(extras.getString("currency")));
+                adyenCheckoutListener.checkoutAuthorizedPayment(checkoutResponse);
+
+            }
+
+            @Override
+            public void onError(String error) {
+                mProgressDialog.dismiss();
+                adyenCheckoutListener.checkoutFailedWithError(error);
+            }
+        });
+
+    }
     private CardPaymentData buildCardData() {
         CardPaymentData cardPaymentData = new CardPaymentData();
 

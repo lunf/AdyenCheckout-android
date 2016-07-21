@@ -27,19 +27,22 @@ public class PaymentServiceImplTest {
     public void testFetchPublicKey() throws Exception {
         PaymentService paymentService = mock(PaymentServiceImpl.class);
         PaymentServiceImpl.VolleyCallback callback = mock(PaymentServiceImpl.VolleyCallback.class);
+        boolean isTestMode = true;
+        String cseToken = "8714279602311541";
+
         String url = "https://test.adyen.com/hpp/cse/8714279602311541/json.shtml";
 
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
                 PaymentServiceImpl.VolleyCallback callback = (PaymentServiceImpl.VolleyCallback)invocation.getArguments()[1];
-                callback.onSuccess(new JSONObject());
+                callback.onSuccess("");
                 return null;
             }
-        }).when(paymentService).fetchPublicKey(url, callback);
+        }).when(paymentService).fetchPublicKey(isTestMode, cseToken, callback);
 
-        paymentService.fetchPublicKey(url, callback);
+        paymentService.fetchPublicKey(isTestMode, cseToken, callback);
 
-        verify(callback, only()).onSuccess((JSONObject) any());
+        verify(callback, only()).onSuccess("");
     }
 }

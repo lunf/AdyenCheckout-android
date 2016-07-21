@@ -3,4 +3,6 @@
 
     <!-- ERRORS -->
     <string name="error_400">Unexpected response code 400</string>
+    <string name="error_json_data">Invalid data response</string>
+    <string name="error_network">Fail to read server response. Please check Internet connection</string>
 </resources>

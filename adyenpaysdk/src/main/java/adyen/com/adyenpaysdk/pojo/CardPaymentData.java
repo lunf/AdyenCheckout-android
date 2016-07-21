@@ -9,10 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import adyen.com.adyenpaysdk.Adyen;
-import adyen.com.adyenpaysdk.exceptions.EncrypterException;
-import adyen.com.adyenpaysdk.exceptions.NoPublicKeyExeption;
-
 /**
  * Created by andrei on 11/5/15.
  */

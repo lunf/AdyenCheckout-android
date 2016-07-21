@@ -50,7 +50,8 @@ public class PaymentServiceImpl implements PaymentService {
             }
         });
 
-        NetworkController.getInstance(mContext).addToRequestQueue(jsonObjectRequest);
+        NetworkController networkController = new NetworkController(mContext);
+        networkController.addToRequestQueue(jsonObjectRequest);
     }
 
     private String getPaymentUrl() {

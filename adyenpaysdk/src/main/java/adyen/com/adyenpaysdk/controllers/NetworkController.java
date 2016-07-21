@@ -17,20 +17,10 @@ public class NetworkController {
 
     private RequestQueue mRequestQueue;
 
-    private static NetworkController mInstance;
+    private Context mContext;
 
-    private static Context mContext;
-
-    private NetworkController(Context context) {
+    public NetworkController(Context context) {
         mContext = context;
-    }
-
-    public static synchronized NetworkController getInstance(Context context) {
-        if (null == mInstance) {
-            mInstance =  new NetworkController(context);
-        }
-
-        return mInstance;
     }
 
     public RequestQueue getRequestQueue() {
