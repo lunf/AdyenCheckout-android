@@ -7,6 +7,7 @@ I fork this repo because the original has the following issues
  * The coding is not meeting our standard, there are couping code and class is not encapsulation. E.g: CardPaymentData requires Adyen instance to do the serialise (encryption). 
  * The business logic in service layer is not contained, you will see it in network layer.
  * Some method violate the Single Responsibility Principle.
+ * Bad naming
 
 ### Future Improvement
  * Move to Reactive instead of using callback
