@@ -60,6 +60,7 @@ public class PaymentActivity extends Activity {
     private AdyenSdk mAdyenSdk;
 
     private ProgressDialog mProgressDialog;
+    private String mPublicKey;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,10 +95,16 @@ public class PaymentActivity extends Activity {
                         ColorUtil.changeColorHSB(getResources().getString(extras.getInt("backgroundColor")))));
         }
 
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Loading. Please wait.....");
 
         mAdyenSdk = new AdyenSdk(this);
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Loading. Please wait.....");
+        mProgressDialog.show();
+
+        String cseToken = extras.getString("token");
+        boolean isTestMode = extras.getBoolean("useTestBackend");
+        getPublicKey(isTestMode, cseToken);
     }
 
     @Override
@@ -216,24 +223,30 @@ public class PaymentActivity extends Activity {
         mPayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (CreditCardForm.isValid()) {
+                if (CreditCardForm.isValid() && !mPublicKey.isEmpty()) {
                     hideInputKeyboard();
                     mProgressDialog.show();
-                    String cseToken = extras.getString("token");
-                    boolean isTestMode = extras.getBoolean("useTestBackend");
-                    mAdyenSdk.fetchPublicKey(isTestMode, cseToken, new AdyenSdk.CompletionCallback() {
-                        @Override
-                        public void onSuccess(String result) {
-                            encryptPaymentData(result);
-                        }
+                    encryptPaymentData(mPublicKey);
 
-                        @Override
-                        public void onError(String error) {
-                            mProgressDialog.dismiss();
-                            adyenCheckoutListener.checkoutFailedWithError(error);
-                        }
-                    });
                 }
+            }
+        });
+    }
+
+    private void getPublicKey(boolean isTestMode, String cseToken) {
+
+
+        mAdyenSdk.fetchPublicKey(isTestMode, cseToken, new AdyenSdk.CompletionCallback() {
+            @Override
+            public void onSuccess(String result) {
+                mPublicKey = result;
+                mProgressDialog.dismiss();
+            }
+
+            @Override
+            public void onError(String error) {
+                mProgressDialog.dismiss();
+                adyenCheckoutListener.checkoutFailedWithError(error);
             }
         });
     }
