@@ -12,8 +12,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import adyen.com.adyenpaysdk.exceptions.CheckoutRequestException;
-import adyen.com.adyenpaysdk.pojo.CheckoutRequest;
-import adyen.com.adyenpaysdk.pojo.CheckoutResponse;
+import adyen.com.adyenpaysdk.pojo.PaymentInitRequest;
+import adyen.com.adyenpaysdk.pojo.CheckoutMerchantRequest;
 import adyen.com.adyenpaysdk.util.Currency;
 import adyen.com.adyenuisdk.PaymentActivity;
 import adyen.com.adyenuisdk.listener.AdyenCheckoutListener;
@@ -46,16 +46,16 @@ public class MainActivity extends FragmentActivity implements AdyenCheckoutListe
     public void initPayment(View view) {
         ConfigLoader configLoader = new ConfigLoader(this);
         JSONObject configuration = configLoader.loadJsonConfiguration();
-        CheckoutRequest checkoutRequest = new CheckoutRequest();
+        PaymentInitRequest paymentInitRequest = new PaymentInitRequest();
         try {
-            checkoutRequest.setBrandColor(R.color.nespresso_grey);
-            checkoutRequest.setBrandLogo(R.mipmap.nespresso_logo);
-            checkoutRequest.setCheckoutAmount(10f);
-            checkoutRequest.setCurrency(Currency.EUR);
-            checkoutRequest.setToken(configuration.getString("userToken"));
-            checkoutRequest.setTestBackend(true);
+            paymentInitRequest.setBrandColor(R.color.nespresso_grey);
+            paymentInitRequest.setBrandLogo(R.mipmap.nespresso_logo);
+            paymentInitRequest.setCheckoutAmount(10f);
+            paymentInitRequest.setCurrency(Currency.EUR);
+            paymentInitRequest.setToken(configuration.getString("userToken"));
+            paymentInitRequest.setTestBackend(true);
 
-            Intent intent = new PaymentActivity.PaymentActivityBuilder(checkoutRequest).build(this, context);
+            Intent intent = new PaymentActivity.PaymentActivityBuilder(paymentInitRequest).build(this, context);
             startActivity(intent);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -65,8 +65,8 @@ public class MainActivity extends FragmentActivity implements AdyenCheckoutListe
     }
 
     @Override
-    public void checkoutAuthorizedPayment(CheckoutResponse checkoutResponse) {
-        Log.i("Response: ", checkoutResponse.toString());
+    public void checkoutAuthorizedPayment(CheckoutMerchantRequest checkoutMerchantRequest) {
+        Log.i("Response: ", checkoutMerchantRequest.toString());
         Toast.makeText(context, "Card data encrypted and ready to submit to your server", Toast.LENGTH_SHORT).show();
     }
 

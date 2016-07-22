@@ -5,7 +5,7 @@ import adyen.com.adyenpaysdk.util.Currency;
 /**
  * Created by andrei on 12/9/15.
  */
-public class CheckoutRequest {
+public class PaymentInitRequest {
 
     private float checkoutAmount;
     private Currency currency;

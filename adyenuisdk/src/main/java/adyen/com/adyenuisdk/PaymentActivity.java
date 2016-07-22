@@ -25,8 +25,8 @@ import java.util.Date;
 import adyen.com.adyenpaysdk.AdyenSdk;
 import adyen.com.adyenpaysdk.exceptions.CheckoutRequestException;
 import adyen.com.adyenpaysdk.pojo.CardPaymentData;
-import adyen.com.adyenpaysdk.pojo.CheckoutRequest;
-import adyen.com.adyenpaysdk.pojo.CheckoutResponse;
+import adyen.com.adyenpaysdk.pojo.PaymentInitRequest;
+import adyen.com.adyenpaysdk.pojo.CheckoutMerchantRequest;
 import adyen.com.adyenpaysdk.util.Currency;
 import adyen.com.adyenuisdk.customcomponents.AdyenEditText;
 import adyen.com.adyenuisdk.listener.AdyenCheckoutListener;
@@ -146,46 +146,46 @@ public class PaymentActivity extends Activity {
 
     public static class PaymentActivityBuilder {
         Bundle arguments;
-        CheckoutRequest checkoutRequest;
+        PaymentInitRequest paymentInitRequest;
 
-        public PaymentActivityBuilder(CheckoutRequest request) throws CheckoutRequestException {
+        public PaymentActivityBuilder(PaymentInitRequest request) throws CheckoutRequestException {
             arguments = new Bundle();
-            checkoutRequest = request;
+            paymentInitRequest = request;
             initPaymentFragment();
         }
 
         private void initPaymentFragment() throws CheckoutRequestException {
-            if(checkoutRequest.getBrandColor() != 0) {
-                arguments.putInt("backgroundColor", checkoutRequest.getBrandColor());
+            if(paymentInitRequest.getBrandColor() != 0) {
+                arguments.putInt("backgroundColor", paymentInitRequest.getBrandColor());
             } else {
                 throw new CheckoutRequestException("Brand color is not set! Please set the brand color.");
             }
 
-            if(checkoutRequest.getBrandLogo() != 0) {
-                arguments.putInt("logo", checkoutRequest.getBrandLogo());
+            if(paymentInitRequest.getBrandLogo() != 0) {
+                arguments.putInt("logo", paymentInitRequest.getBrandLogo());
             } else {
                 throw new CheckoutRequestException("Brand logo is not set! Please set the brand logo.");
             }
 
-            if(checkoutRequest.getCheckoutAmount() > 0) {
-                arguments.putFloat("amount", checkoutRequest.getCheckoutAmount());
+            if(paymentInitRequest.getCheckoutAmount() > 0) {
+                arguments.putFloat("amount", paymentInitRequest.getCheckoutAmount());
             } else {
                 throw new CheckoutRequestException("Amount is not set! Please set the amount.");
             }
 
-            if(checkoutRequest.getCurrency() != null && !TextUtils.isEmpty(checkoutRequest.getCurrency().toString())) {
-                arguments.putString("currency", checkoutRequest.getCurrency().toString());
+            if(paymentInitRequest.getCurrency() != null && !TextUtils.isEmpty(paymentInitRequest.getCurrency().toString())) {
+                arguments.putString("currency", paymentInitRequest.getCurrency().toString());
             } else {
                 throw new CheckoutRequestException("Currency is not set! Please set the currency.");
             }
 
-            if(!TextUtils.isEmpty(checkoutRequest.getToken())) {
-                arguments.putString("token", checkoutRequest.getToken());
+            if(!TextUtils.isEmpty(paymentInitRequest.getToken())) {
+                arguments.putString("token", paymentInitRequest.getToken());
             } else {
                 throw new CheckoutRequestException("Token is not set! Please set the token.");
             }
 
-            arguments.putBoolean("useTestBackend", checkoutRequest.isTestBackend());
+            arguments.putBoolean("useTestBackend", paymentInitRequest.isTestBackend());
         }
 
         public Intent build(AdyenCheckoutListener listener, Context context) {
@@ -246,11 +246,11 @@ public class PaymentActivity extends Activity {
             @Override
             public void onSuccess(String result) {
                 mProgressDialog.dismiss();
-                CheckoutResponse checkoutResponse = new CheckoutResponse();
-                checkoutResponse.setPaymentData(result);
-                checkoutResponse.setAmount(extras.getFloat("amount"));
-                checkoutResponse.setCurrency(Currency.valueOf(extras.getString("currency")));
-                adyenCheckoutListener.checkoutAuthorizedPayment(checkoutResponse);
+                CheckoutMerchantRequest checkoutMerchantRequest = new CheckoutMerchantRequest();
+                checkoutMerchantRequest.setPaymentData(result);
+                checkoutMerchantRequest.setAmount(extras.getFloat("amount"));
+                checkoutMerchantRequest.setCurrency(Currency.valueOf(extras.getString("currency")));
+                adyenCheckoutListener.checkoutAuthorizedPayment(checkoutMerchantRequest);
 
             }
 
