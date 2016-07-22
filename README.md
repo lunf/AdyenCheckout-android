@@ -240,8 +240,8 @@ private void encryptPaymentData(String publicKey, final CardPaymentData cardPaym
 
             CheckoutMerchantRequest checkoutMerchantRequest = new CheckoutMerchantRequest();
             checkoutMerchantRequest.setPaymentData(paymentDataEncrypted);
-            checkoutMerchantRequest.setAmount(cardPaymentData.getAmount()));
-            checkoutMerchantRequest.setCurrency(cardPaymentData.getCurrency().getCurrencySign()));
+            checkoutMerchantRequest.setAmount(extras.getFloat("amount"));
+            checkoutMerchantRequest.setCurrency(Currency.valueOf(extras.getString("currency")));
             
 
         }
