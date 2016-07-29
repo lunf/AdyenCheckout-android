@@ -35,7 +35,7 @@ public class PaymentActivityTest {
         Bundle arguments = new Bundle();
         arguments.putInt("backgroundColor", R.color.nespresso_grey);
         arguments.putInt("logo", R.mipmap.nespresso_logo);
-        arguments.putFloat("amount", 1f);
+        arguments.putString("amount", "1.00");
         arguments.putString("currency", Currency.EUR.toString());
         arguments.putString("token", "testToken");
         arguments.putBoolean("useTestBackend", true);

@@ -1,5 +1,7 @@
 package adyen.com.adyenpaysdk.pojo;
 
+import java.math.BigDecimal;
+
 import adyen.com.adyenpaysdk.util.Currency;
 
 /**
@@ -7,7 +9,7 @@ import adyen.com.adyenpaysdk.util.Currency;
  */
 public class PaymentInitRequest {
 
-    private float checkoutAmount;
+    private BigDecimal checkoutAmount;
     private Currency currency;
     private int brandColor;
     private int brandLogo;
@@ -15,11 +17,11 @@ public class PaymentInitRequest {
     private boolean testBackend;
 
 
-    public float getCheckoutAmount() {
+    public BigDecimal getCheckoutAmount() {
         return checkoutAmount;
     }
 
-    public void setCheckoutAmount(float checkoutAmount) {
+    public void setCheckoutAmount(BigDecimal checkoutAmount) {
         this.checkoutAmount = checkoutAmount;
     }
 

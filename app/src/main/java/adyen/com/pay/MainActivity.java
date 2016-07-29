@@ -11,6 +11,8 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
+
 import adyen.com.adyenpaysdk.exceptions.CheckoutRequestException;
 import adyen.com.adyenpaysdk.pojo.PaymentInitRequest;
 import adyen.com.adyenpaysdk.pojo.CheckoutMerchantRequest;
@@ -50,7 +52,7 @@ public class MainActivity extends FragmentActivity implements AdyenCheckoutListe
         try {
             paymentInitRequest.setBrandColor(R.color.nespresso_grey);
             paymentInitRequest.setBrandLogo(R.mipmap.nespresso_logo);
-            paymentInitRequest.setCheckoutAmount(10f);
+            paymentInitRequest.setCheckoutAmount(new BigDecimal(10));
             paymentInitRequest.setCurrency(Currency.EUR);
             paymentInitRequest.setToken(configuration.getString("userToken"));
             paymentInitRequest.setTestBackend(true);

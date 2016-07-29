@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import adyen.com.adyenpaysdk.AdyenSdk;
@@ -174,8 +175,8 @@ public class PaymentActivity extends Activity {
                 throw new CheckoutRequestException("Brand logo is not set! Please set the brand logo.");
             }
 
-            if(paymentInitRequest.getCheckoutAmount() > 0) {
-                arguments.putFloat("amount", paymentInitRequest.getCheckoutAmount());
+            if(paymentInitRequest.getCheckoutAmount().intValue() > 0) {
+                arguments.putString("amount", paymentInitRequest.getCheckoutAmount().toString());
             } else {
                 throw new CheckoutRequestException("Amount is not set! Please set the amount.");
             }
@@ -261,7 +262,8 @@ public class PaymentActivity extends Activity {
                 mProgressDialog.dismiss();
                 CheckoutMerchantRequest checkoutMerchantRequest = new CheckoutMerchantRequest();
                 checkoutMerchantRequest.setPaymentData(result);
-                checkoutMerchantRequest.setAmount(extras.getFloat("amount"));
+                BigDecimal amount = new BigDecimal(extras.getString("amount"));
+                checkoutMerchantRequest.setAmount(amount);
                 checkoutMerchantRequest.setCurrency(Currency.valueOf(extras.getString("currency")));
                 adyenCheckoutListener.checkoutAuthorizedPayment(checkoutMerchantRequest);
 
