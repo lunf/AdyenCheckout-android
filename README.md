@@ -8,6 +8,10 @@ I fork this repo because the original has the following issues
  * The business logic in service layer is not contained, you will see it in network layer.
  * Some method violate the Single Responsibility Principle.
  * Bad naming
+ * Use float for money, they should use BigDecimal as standard
+
+### Warning
+ * The CSE only encrypt the card's info and it do not encrypted the "amount" & "Currency" as a result, it could be changed over the wired. Thus, the integrity of data should be concerned.
 
 ### Future Improvement
  * Move to Reactive instead of using callback
@@ -175,7 +179,7 @@ As you are using our payment button, you need to call the following to init the 
     try {
         paymentInitRequest.setBrandColor(R.color.nespresso_grey);
         paymentInitRequest.setBrandLogo(R.mipmap.nespresso_logo);
-        paymentInitRequest.setCheckoutAmount(10f);
+        paymentInitRequest.setCheckoutAmount(new BigDecimal("10.00"));
         paymentInitRequest.setCurrency(Currency.EUR);
         paymentInitRequest.setToken(configuration.getString("userToken"));
         paymentInitRequest.setTestBackend(true);
@@ -241,7 +245,8 @@ private void encryptPaymentData(String publicKey, final CardPaymentData cardPaym
 
             CheckoutMerchantRequest checkoutMerchantRequest = new CheckoutMerchantRequest();
             checkoutMerchantRequest.setPaymentData(paymentDataEncrypted);
-            checkoutMerchantRequest.setAmount(extras.getFloat("amount"));
+            BigDecimal amount = new BigDecimal(extras.getString("amount"));
+            checkoutMerchantRequest.setAmount(amount);
             checkoutMerchantRequest.setCurrency(Currency.valueOf(extras.getString("currency")));
             
 
