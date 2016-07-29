@@ -12,7 +12,7 @@ import java.util.TimeZone;
 /**
  * Created by andrei on 11/5/15.
  */
-public class CardPaymentData implements PaymentData {
+public class CardPaymentData {
 
     private static final String tag = CardPaymentData.class.getSimpleName();
 
